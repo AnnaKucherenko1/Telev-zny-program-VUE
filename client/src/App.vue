@@ -1,30 +1,30 @@
 <template>
   <NavBar :currentDay="currentDay"/>
   <ErrorSnackBar v-model:snackbar="snackbar" :text="text" />
-  <!-- Render a <div> for each element in this.stations -->
-  <div v-for="(station, index) in stations" :key="index">
-    <!--display station data here -->
+  <!-- <div v-for="(station, index) in stations" :key="index">
     {{ station.title }}
-  </div>
+  </div> -->
+  <Program />
 </template>
 
 <script>
   import ErrorSnackBar from './components/ErrorSnackBar.vue';
 import NavBar from './components/NavBar.vue';
+import Program from './components/Program.vue';
   import { getStations } from './services/api'; 
 
   export default {
     name: 'App',
     components: {
     NavBar,
-    ErrorSnackBar
+    ErrorSnackBar,
+    Program
 },
     created() {
       this.fetchStations()
       .then((response) => {
         console.log(response);
         if (response === null || !response?.status || !response.result) {
-          console.log("shpuld show snackbar");
           this.toggleSnackbar();
           return;
         }
