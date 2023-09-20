@@ -31,7 +31,6 @@ export default {
 </script>
 
 <style scoped>
-/* Add styles for the navbar */
 .navbar {
   position: sticky;
   top: 0;
