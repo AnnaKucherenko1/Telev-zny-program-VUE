@@ -1,12 +1,13 @@
 <template>
   <div class="tv-schedule">
-    <div class="time-slots" v-for="timeSlot in timeSlots" :key="timeSlot">
-      {{ timeSlot }}
-    </div>
-
+    <div class="time-slots" v-if="timeSlots">
+  <div class="time-slot" v-for="timeSlot in timeSlotsFunction" :key="timeSlot">
+    {{ timeSlot }}
+  </div>
+</div>
     <div v-for="(channelShows, index) in channels" :key="index">
-      <div class="show-slot" v-for="show in channelShows" :key="show.id">
-        <div class="show-details">
+      <div class="show-slot" v-for="(show, j) in channelShows" :key="show.id">
+        <div class="show-details" :style="calculateShowStyle(show, channelShows[j +1]?.time || null)">
           <div class="show-title">{{ show.title }}</div>
           <div class="show-time">{{ show.time }}</div>
         </div>
@@ -26,22 +27,26 @@ export default {
   // }
   data() {
     return {
-      timeSlots: [], 
-      channels: [], 
+      channels: [],
+      timeSlots: [],
     };
   },
   computed: {
     timeSlotsFunction() {
-      const slots = [];
-      const startTime = new Date().setHours(0, 0, 0, 0); 
-      for (let i = 0; i < 24 * 12; i++) {
-        const time = new Date(startTime + i * 5 * 60 * 1000);
-        slots.push(
-          time.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-        );
-      }
-      return slots;
-    },
+  const slots = [];
+  // TODO: Get rid of magic numbers
+  const startTime = new Date().setHours(0, 0, 0, 0); 
+  for (let i = 0; i < 24 * 12; i++) {
+    const time = new Date(startTime + i * 5 * 60 * 1000);
+    const hours = time.getHours().toString().padStart(2, '0');
+    const minutes = time.getMinutes().toString().padStart(2, '0');
+    slots.push(`${hours}:${minutes}`);
+  }
+  return slots;
+}
+},
+mounted() {
+    this.timeSlots = this.timeSlotsFunction;
   },
   created() {
     this.fetchStations().then((response) => {
@@ -64,6 +69,26 @@ export default {
     });
   },
   methods: {
+    calculateShowStyle(show, endTime) {
+      const startTime = show.startTimes; // Replace with actual start time
+
+      const endTimeArr = endTime === null ? "24:00" : endTime;
+
+      const [startTimeHours, startTimeMinutes] = startTime.split(":");
+      const [endTimeHours, endTimeMinutes]     = endTimeArr.split(":");
+      const startTimeTotalMinutes              = parseInt(startTimeHours) * 60 + parseInt(startTimeMinutes);
+      const endTimeTotalMinutes                = parseInt(endTimeHours) * 60 + parseInt(endTimeMinutes);
+      const totalShowTime                      = endTimeTotalMinutes - startTimeTotalMinutes;
+
+      // Calculate the height based on your logic
+      // TODO: Get rid of magic numbers
+      const height = (totalShowTime / 5) * 25;
+
+      // Return the style object with the height property
+      return {
+        height: height + 'px',
+      };
+    },
     toggleSnackbar() {
       this.snackbar = !this.snackbar;
     },
@@ -83,12 +108,16 @@ export default {
   padding: 20px;
 }
 
-/* Style time slots on the left */
 .time-slots {
   grid-column: 1;
   text-align: right;
   font-weight: bold;
   padding-right: 10px;
+}
+
+.time-slot {
+  height: 25px;
+  background-color: red;
 }
 
 /* Style channel names and show slots */
