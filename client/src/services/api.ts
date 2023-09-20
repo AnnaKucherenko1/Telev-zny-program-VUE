@@ -12,7 +12,8 @@ export const getStations = async (maxRetries = 3) => {
     dataOrder: ['module:com_playground/tv/tv/getStations'],
   };
 
-  const makeApiCall = async () => {
+  // TODO: Fix typing
+  const makeApiCall = async (): Promise<any> => {
     try {
       console.log('retries: ', retries);
       const response = await axios.post(`${apiUrl}`, requestData);
@@ -60,7 +61,8 @@ export const getPrograms = async (maxRetries = 3) => {
     },
   };
 
-  const makeApiCall = async () => {
+  // TODO: Fix typing
+  const makeApiCall = async (): Promise<any> => {
     try {
       console.log('retries: ', retries);
       const response = await axios.post(`${apiUrl}`, requestData);
