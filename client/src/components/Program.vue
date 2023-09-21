@@ -1,4 +1,5 @@
 <template>
+  <div class="wrapper" v-for="(channels, index) in channelsAllDays" :key="index">
     <div class="tv-schedule">
       <div class="time-table" v-if="timeSlots">
         <div class="time-slot" :style="calculateSlotStyle(index)" v-for="(timeSlot, index) in this.timeSlots" :key="timeSlot">
@@ -15,16 +16,25 @@
         </div>
       </div>
     </div>
+  </div>
 </template>
 <script>
 import { getPrograms } from '../services/api';
 export default {
   name: 'NavBar',
   data() {
+    const today = new Date();
+    const year = today.getFullYear();
+    const month = String(today.getMonth() + 1).padStart(2, '0');
+    const day = String(today.getDate()).padStart(2, '0');
+    const formattedDate = `${year}-${month}-${day}`;
     return {
       channels: [],
+      channelsAllDays: [],
       timeSlots: [],
       timeFrameHeigh: 25,
+      date: formattedDate,
+      hasRun: false,
     };
   },
   computed: {
@@ -43,6 +53,7 @@ export default {
   },
   mounted() {
     this.timeSlots = this.timeSlotsFunction;
+    document.addEventListener('scroll', this.handleScroll);
   },
   created() {
     this.fetchPrograms().then((response) => {
@@ -64,12 +75,11 @@ export default {
         }
 
         this.channels.push(
-          jojka.sort(this.compareTimeStrings), 
-          markiza.sort(this.compareTimeStrings), 
-          jednotka.sort(this.compareTimeStrings)
+          jojka?.sort(this.compareTimeStrings), 
+          markiza?.sort(this.compareTimeStrings), 
+          jednotka?.sort(this.compareTimeStrings)
         );
-        console.log(this.channels, 'this chnanels')
-        console.log(jojka, markiza, jednotka, 'lll')
+        this.channelsAllDays.push(this.channels)
         
       }
     });
@@ -109,23 +119,66 @@ export default {
       return hoursA - hoursB;
     },
     async fetchPrograms() {
-      return await getPrograms();
+      return await getPrograms(this.date, 'abc002');
     },
+    async fetchTomorrowPrograms() {
+      return await getPrograms('2023-09-11', 'abc003');
   },
+  handleScroll() {
+    const containerHeight = 65;
+      const scrollHeight = Math.round(window.scrollY);
+      const firstTwoDigits = Number(scrollHeight.toString().slice(0, 2));
+      console.log(firstTwoDigits)
+      if (firstTwoDigits === containerHeight && !this.hasRun) {
+        console.log('heu')
+        this.hasRun = true
+        this.fetchTomorrowPrograms().then((response) => {
+      console.log(response, 'tomorrows');
+      if (response === null) {
+        this.toggleSnackbar();
+        return;
+      } else {
+        const jojka =
+          response['module:com_playground/tv/tv/getProgram#1']?.result;
+        const markiza =
+          response['module:com_playground/tv/tv/getProgram#2']?.result;
+        const jednotka =
+          response['module:com_playground/tv/tv/getProgram#3']?.result;
+
+        if (jojka === null || markiza === null || jednotka === null) {
+          this.toggleSnackbar();
+          return;
+        }
+
+        this.channels.push(
+          jojka?.sort(this.compareTimeStrings), 
+          markiza?.sort(this.compareTimeStrings), 
+          jednotka?.sort(this.compareTimeStrings)
+        );
+        this.channelsAllDays.push(this.channels)
+        
+      }
+    });
+      }
+  },
+  },
+beforeUnmount() {
+  document.removeEventListener('scroll', this.handleScroll);
+},
 };
 </script>
 
 <style scoped>
 
-.wrapper {
+/* .wrapper {
   display: flex;
   flex-direction: column;
   height: auto;
-}
+} */
 .tv-schedule {
   display: grid;
   grid-template-columns: auto repeat(3, 1fr); 
-  grid-template-rows: repeat(288, 1fr); 
+  /* grid-template-rows: repeat(288, 1fr);  */
   gap: 5px;
   font-family: Arial, sans-serif;
   padding: 20px;

@@ -41,25 +41,25 @@ import Program from './components/Program.vue';
       };
     },
     mounted() {
-      window.addEventListener('scroll', this.updateCurrentDay);
+      // window.addEventListener('scroll', this.updateCurrentDay);
     },
     beforeUnmount() {
-      window.removeEventListener('scroll', this.updateCurrentDay);
+      // window.removeEventListener('scroll', this.updateCurrentDay);
     },
     
     methods: {
-      updateCurrentDay() {
-        const scrollPosition = window.scrollY;
-        if (scrollPosition < 500) {
-          this.currentDay = 'dnes'; 
-        } else if (scrollPosition < 1000) {
-          this.currentDay = 'včera'; 
-        } else if (scrollPosition < 1500) {
-          this.currentDay = 'zajtra'; 
-        } else {
-          this.currentDay = 'pozajtra'; 
-        }
-      },
+      // updateCurrentDay() {
+      //   const scrollPosition = window.scrollY;
+      //   if (scrollPosition < 500) {
+      //     this.currentDay = 'dnes'; 
+      //   } else if (scrollPosition < 1000) {
+      //     this.currentDay = 'včera'; 
+      //   } else if (scrollPosition < 1500) {
+      //     this.currentDay = 'zajtra'; 
+      //   } else {
+      //     this.currentDay = 'pozajtra'; 
+      //   }
+      // },
       toggleSnackbar() {
         this.snackbar = !this.snackbar;
       },
