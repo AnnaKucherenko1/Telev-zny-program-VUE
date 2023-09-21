@@ -49,15 +49,15 @@ export const getPrograms = async (maxRetries = 3) => {
     ],
     'module:com_playground/tv/tv/getProgram#1': {
       stationId: 1005,
-      date: '2023-09-19',
+      date: '2023-09-21',
     },
     'module:com_playground/tv/tv/getProgram#2': {
       stationId: 2412,
-      date: '2023-09-19',
+      date: '2023-09-21',
     },
     'module:com_playground/tv/tv/getProgram#3': {
       stationId: 6214,
-      date: '2023-09-19',
+      date: '2023-09-21',
     },
   };
 

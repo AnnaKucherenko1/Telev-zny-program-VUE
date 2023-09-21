@@ -9,8 +9,8 @@
       <div class="channel-column" v-for="(channelShows, index) in channels" :key="index">
         <div class="show-slot" :style="calculateShowStyle(show, channelShows[j +1]?.time || null, j, channelShows.length)" v-for="(show, j) in channelShows" :key="show.id">
           <div class="show-details">
-            <div class="show-title">{{ show.title }}</div>
-            <div class="show-time">{{ show.time }}</div>
+            <div class="showTime">{{ show.time }} </div>
+            <div>{{ show.title }}</div>
           </div>
         </div>
       </div>
@@ -137,7 +137,11 @@ export default {
   grid-template-columns: 1fr;
   border-top: solid 1px red;
 }
-
+.show-details {
+  display: flex;
+  flex-direction: row;
+  gap: 2px
+}
 .time-table {
   display: grid; 
   grid-template-rows: repeat(288, 25px); 
@@ -170,5 +174,8 @@ export default {
 
 .show-slot:hover {
   background-color: #e0e0e0;
+}
+.showTime {
+  text-decoration-line: underline;
 }
 </style>
