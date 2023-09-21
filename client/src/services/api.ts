@@ -35,13 +35,13 @@ export const getStations = async (maxRetries = 3) => {
   return makeApiCall();
 };
 
-export const getPrograms = async (maxRetries = 3) => {
+export const getPrograms = async (date: string, id: string, maxRetries = 3,) => {
   let retries = 0;
 
   const requestData = {
     version: 3,
     sessionId: '0evig597cb7qfi5ndp2n0cmju7',
-    requestIdf: 'abc002',
+    requestIdf: id,
     dataOrder: [
       'module:com_playground/tv/tv/getProgram#1',
       'module:com_playground/tv/tv/getProgram#2',
@@ -49,15 +49,15 @@ export const getPrograms = async (maxRetries = 3) => {
     ],
     'module:com_playground/tv/tv/getProgram#1': {
       stationId: 1005,
-      date: '2023-09-19',
+      date: date,
     },
     'module:com_playground/tv/tv/getProgram#2': {
       stationId: 2412,
-      date: '2023-09-19',
+      date: date,
     },
     'module:com_playground/tv/tv/getProgram#3': {
       stationId: 6214,
-      date: '2023-09-19',
+      date: date,
     },
   };
 
@@ -83,3 +83,5 @@ export const getPrograms = async (maxRetries = 3) => {
   };
   return makeApiCall();
 };
+
+
