@@ -2,20 +2,25 @@ import axios from 'axios';
 
 const apiUrl = 'https://playground.systemomega.com/neon';
 
+const generateRequestId = () => {
+  const timestamp = Date.now();
+  const randomPart = Math.floor(Math.random() * 1000);
+  return `abc${timestamp}${randomPart}`;
+};
+
 export const getStations = async (maxRetries = 3) => {
   let retries = 0;
 
   const requestData = {
     version: 3,
     sessionId: '0evig597cb7qfi5ndp2n0cmju7',
-    requestIdf: 'abc001',
+    requestIdf: generateRequestId(),
     dataOrder: ['module:com_playground/tv/tv/getStations'],
   };
 
   // TODO: Fix typing
   const makeApiCall = async (): Promise<any> => {
     try {
-      console.log('retries: ', retries);
       const response = await axios.post(`${apiUrl}`, requestData);
 
       return response.data['module:com_playground/tv/tv/getStations'];
@@ -23,7 +28,6 @@ export const getStations = async (maxRetries = 3) => {
       console.error('Error fetching stations:', error);
 
       if (retries < maxRetries) {
-        console.log(`Retrying (Retry ${retries + 1}/${maxRetries})`);
         retries++;
         return makeApiCall();
       } else {
@@ -35,13 +39,13 @@ export const getStations = async (maxRetries = 3) => {
   return makeApiCall();
 };
 
-export const getPrograms = async (date: string, id: string, maxRetries = 3,) => {
+export const getPrograms = async (date: string, id: number[], maxRetries = 3,) => {
   let retries = 0;
 
   const requestData = {
     version: 3,
     sessionId: '0evig597cb7qfi5ndp2n0cmju7',
-    requestIdf: id,
+    requestIdf: generateRequestId(),
     dataOrder: [
       'module:com_playground/tv/tv/getProgram#1',
       'module:com_playground/tv/tv/getProgram#2',
@@ -64,7 +68,6 @@ export const getPrograms = async (date: string, id: string, maxRetries = 3,) => 
   // TODO: Fix typing
   const makeApiCall = async (): Promise<any> => {
     try {
-      console.log('retries: ', retries);
       const response = await axios.post(`${apiUrl}`, requestData);
 
       return response.data;
@@ -72,7 +75,6 @@ export const getPrograms = async (date: string, id: string, maxRetries = 3,) => 
       console.error('Error fetching stations:', error);
 
       if (retries < maxRetries) {
-        console.log(`Retrying (Retry ${retries + 1}/${maxRetries})`);
         retries++;
         return makeApiCall();
       } else {

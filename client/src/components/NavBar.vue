@@ -5,11 +5,13 @@
     </div>
     <div>
       <div class="borderForImg">
-        <div class="images">
-          <div class="currentDay">{{ currentDay }}</div>
+        <div class="elementsWrapper">
+      <div class="currentDay">{{ currentDay }}</div>
+      <div class="imagesDiv">
       <img src="./../assets/jojka.png" alt="logo jojka" class="jojka"/>
       <img src="./../assets/markíza.png" alt="logo markiza" class="markiza"/>
       <img src="./../assets/jednotka.png" alt="logo jednotka" class="jednotka"/>
+    </div>
     </div>
    </div>
   </div>
@@ -51,16 +53,16 @@ export default {
   height: 30px;
   color: white;
   width: 60px;
-  border-radius: 10%;
+  border-radius: 30px;
   font-size: 10px;
 }
 
-.images {
+.elementsWrapper {
 width: 100%;
 display: flex;
 align-items: center;
 justify-content: center;  
-gap: 10%
+gap: 11%
 }
 
 .jojka {
@@ -78,8 +80,17 @@ gap: 10%
   border-radius: 10px;
   
 }
+.imagesDiv {
+  width: 45%;
+  gap: 20%;
+  justify-content: center;
+  margin-right: 9%;
+  display: flex;
+  align-items: center;
+  /* justify-content: space-around;   */
+}
 .borderForImg {
- margin-top: -30px;
+ margin-top: -25px;
 }
 </style>
 
