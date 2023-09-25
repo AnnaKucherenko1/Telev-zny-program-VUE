@@ -7,7 +7,7 @@ To install the project, follow these steps:
 1. Open your terminal.
 2. Navigate to the "client" directory using the `cd` command:
 ```console
- cd client || cd server
+ cd client
 ```
 3. Run the following command to install the project dependencies:
  ```console
