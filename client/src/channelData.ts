@@ -1,3 +1,7 @@
+export interface ShowDetails {
+  imageSrc: string;
+  info: string;
+}
 export const channelData = [
   {
     imageSrc: require('./assets/bones.jpg'),

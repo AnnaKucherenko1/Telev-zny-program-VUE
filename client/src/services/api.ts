@@ -1,14 +1,14 @@
 import axios from 'axios';
+import { uuid } from 'vue-uuid';
+import { ProgramResponse, StationResponse, StationResult } from './interfaces';
 
-const apiUrl = 'https://playground.systemomega.com/neon';
+const API_URL = 'https://playground.systemomega.com/neon';
+const MAX_RETRIES = 6;
 
 const generateRequestId = () => {
-  const timestamp = Date.now();
-  const randomPart = Math.floor(Math.random() * 1000);
-  return `abc${timestamp}${randomPart}`;
+  return uuid.v1();
 };
-
-export const getStations = async (maxRetries = 3) => {
+export const getStations = async (maxRetries = MAX_RETRIES): Promise<StationResult | null> => {
   let retries = 0;
 
   const requestData = {
@@ -19,9 +19,9 @@ export const getStations = async (maxRetries = 3) => {
   };
 
   // TODO: Fix typing
-  const makeApiCall = async (): Promise<any> => {
+  const makeApiCall = async (): Promise<StationResult | null> => {
     try {
-      const response = await axios.post(`${apiUrl}`, requestData);
+      const response = await axios.post(`${API_URL}`, requestData);
 
       return response.data['module:com_playground/tv/tv/getStations'];
     } catch (error) {
@@ -39,7 +39,14 @@ export const getStations = async (maxRetries = 3) => {
   return makeApiCall();
 };
 
-export const getPrograms = async (date: string, id: number[], maxRetries = 3,) => {
+export const getPrograms = async (
+  date: string,
+  stationIds: number[] | undefined,
+  maxRetries = MAX_RETRIES
+): Promise<ProgramResponse | null> => {
+  if (!stationIds || !stationIds.length) {
+    return null;
+  }
   let retries = 0;
 
   const requestData = {
@@ -52,23 +59,22 @@ export const getPrograms = async (date: string, id: number[], maxRetries = 3,) =
       'module:com_playground/tv/tv/getProgram#3',
     ],
     'module:com_playground/tv/tv/getProgram#1': {
-      stationId: 1005,
+      stationId: stationIds[0],
       date: date,
     },
     'module:com_playground/tv/tv/getProgram#2': {
-      stationId: 2412,
+      stationId: stationIds[1],
       date: date,
     },
     'module:com_playground/tv/tv/getProgram#3': {
-      stationId: 6214,
+      stationId: stationIds[2],
       date: date,
     },
   };
 
-  // TODO: Fix typing
-  const makeApiCall = async (): Promise<any> => {
+  const makeApiCall = async (): Promise<ProgramResponse | null> => {
     try {
-      const response = await axios.post(`${apiUrl}`, requestData);
+      const response = await axios.post(`${API_URL}`, requestData);
 
       return response.data;
     } catch (error) {
