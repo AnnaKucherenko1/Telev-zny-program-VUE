@@ -4,30 +4,31 @@
       <img src="./../assets/systemomega-logo.png" alt="Logo" />
     </div>
     <div>
-      <div class="borderForImg">
-        <div class="elementsWrapper">
-      <div class="currentDay">{{ currentDay }}</div>
-      <div class="imagesDiv">
-      <img src="./../assets/jojka.png" alt="logo jojka" class="jojka"/>
-      <img src="./../assets/markíza.png" alt="logo markiza" class="markiza"/>
-      <img src="./../assets/jednotka.png" alt="logo jednotka" class="jednotka"/>
+      <div class="border-for-img">
+        <div class="elements-wrapper">
+          <div class="current-day">{{ currentDay }}</div>
+          <div class="images-div">
+            <img src="./../assets/jojka.png" alt="logo jojka" class="jojka" />
+            <img src="./../assets/markíza.png" alt="logo markiza" class="markiza" />
+            <img src="./../assets/jednotka.png" alt="logo jednotka" class="jednotka" />
+          </div>
+        </div>
+      </div>
     </div>
-    </div>
-   </div>
-  </div>
   </div>
 </template>
 
-<script>
-export default {
+<script lang='ts'>
+import { defineComponent } from "vue";
+export default defineComponent({
   name: 'NavBar',
   props: {
     currentDay: {
       type: String,
-      default: 'dnes', 
+      default: 'dnes',
     },
-  }
-};
+  },
+});
 </script>
 
 <style scoped>
@@ -39,8 +40,9 @@ export default {
   flex-direction: column;
   padding-top: 20px;
   border: 1px;
-  height: 9vh; 
-  box-shadow: 4px 4px 4px rgba(0, 0, 0, 0.2)
+  height: 9vh;
+  box-shadow: 4px 4px 4px rgba(0, 0, 0, 0.2);
+  z-index: 5;
 }
 
 .logo img {
@@ -48,49 +50,56 @@ export default {
   height: 40px;
   margin-right: 10px;
 }
-.currentDay {
+
+.current-day {
+  display: flex;
+  justify-content: center;
+  align-items: center;
   background-color: black;
   height: 30px;
-  color: white;
   width: 60px;
-  border-radius: 30px;
+  color: white;
   font-size: 10px;
+  border-radius: 30px;
+  margin-top: -10px;
 }
 
-.elementsWrapper {
-width: 100%;
-display: flex;
-align-items: center;
-justify-content: center;  
-gap: 11%
+.elements-wrapper {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 11%
 }
 
 .jojka {
   height: 70px;
   width: 60px
 }
+
 .jednotka {
   height: 70px;
   width: 70px
 }
+
 .markiza {
   background-color: rgb(36, 36, 177);
   width: 130px;
   padding: 5px;
   border-radius: 10px;
-  
+
 }
-.imagesDiv {
+
+.images-div {
   width: 45%;
   gap: 20%;
   justify-content: center;
   margin-right: 9%;
   display: flex;
   align-items: center;
-  /* justify-content: space-around;   */
 }
-.borderForImg {
- margin-top: -25px;
+
+.border-for-img {
+  margin-top: -25px;
 }
 </style>
-

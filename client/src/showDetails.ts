@@ -2,7 +2,7 @@ export interface ShowDetails {
   imageSrc: string;
   info: string;
 }
-export const channelData = [
+export const showDetails = [
   {
     imageSrc: require('./assets/bones.jpg'),
     info: "Každý deň iné kuchárske umenie, množstvo zábavy a emócie! Na obrazovkách televízie JOJ sa každý týždeň môžete stretávať s päticou zaujímavých ľudí, pričom každý deň pripraví „hostinu“ a zábavný program jeden z nich.",

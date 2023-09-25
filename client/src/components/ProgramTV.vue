@@ -1,5 +1,6 @@
 <template>
   <div class="wrapper">
+    <h1>Program je dostupný maximálne na 1 deň dozadu</h1>
     <div class="wrapper" v-if="isYesterdayLoaded">
       <TvSchedule :channels="channelsYesterday" />
     </div>
@@ -15,66 +16,72 @@
     <div class="loader" v-if="isLoading">
       <TvScheduleLoader />
     </div>
-    <div v-if="isAllFetched">
-      Maximum 5 days allowed
-    </div>
+    <h1 v-if="isAllFetched">Program je dostupný maximálne na 5 dní dopredu</h1>
   </div>
 </template>
-<script>
+<script lang="ts">
 import { getPrograms } from '../services/api';
-import { channelData } from '../channelData';
+import { ShowDetails, showDetails } from '../showDetails';
 import TvSchedule from './TvSchedule.vue';
 import TvScheduleLoader from './TvScheduleLoader.vue';
+import { Program, ProgramResponse } from '../services/interfaces';
+import { defineComponent } from "vue";
 
-export default {
+export default defineComponent({
   name: 'ProgramTV',
+  props: {
+    stationdIds: Array<number>,
+  },
   components: {
     TvSchedule,
     TvScheduleLoader,
   },
   data() {
-    const dateData = [];
-    const today = new Date();
-
-    // Function to format a date as "YYYY-MM-DD"
-    const formatDate = (date) => {
-      const year = date.getFullYear();
-      const month = String(date.getMonth() + 1).padStart(2, '0');
-      const day = String(date.getDate()).padStart(2, '0');
-      return `${year}-${month}-${day}`;
-    };
-
-    // Calculate and format yesterday's date
-    const yesterday = new Date(today);
-    yesterday.setDate(today.getDate() - 1);
-    dateData.push(formatDate(yesterday));
-
-    // Format today's date
-    const formattedToday = formatDate(today);
-    dateData.push(formattedToday);
-
-    // Calculate and format the next five days
-    for (let i = 1; i <= 5; i++) {
-      const nextDay = new Date(today);
-      nextDay.setDate(today.getDate() + i);
-      dateData.push(formatDate(nextDay));
-    }
-
     return {
-      maxFutureDays: 5,
-      channelsFutureDays: [],
-      channelsYesterday: [],
-      channelsToday: [],
-      timeSlots: [],
-      timeFrameHeigh: 25,
-      isAllFetched: false,
-      dates: dateData,
-      channelData: channelData,
-      snackbar: false,
-      height: 7200,
-      isLoading: false,
-      isYesterdayLoaded: false,
-      zeroTimeString: "00:00"
+      maxFutureDays: 5 as number,
+      channelsFutureDays: [] as Program[][],
+      channelsYesterday: [] as Program[],
+      channelsToday: [] as Program[],
+      timeSlots: [] as string[],
+      timeFrameHeigh: 5 as number,
+      isAllFetched: false as boolean,
+      dates: this.calculateDateData() as string[],
+      showDetails: showDetails as ShowDetails[],
+      height: 7200 as number,
+      isLoading: false as boolean,
+      isYesterdayLoaded: false as boolean,
+      zeroTimeString: '00:00' as string,
+      currentDay: 'Dnes' as string,
+      dayThresholds: [
+        {
+          threshold: 7200,
+          name: 'Včera',
+        },
+        {
+          threshold: 7200 * 2,
+          name: 'Dnes',
+        },
+        {
+          threshold: 7200 * 3,
+          name: 'Zajtra',
+        },
+        {
+          threshold: 7200 * 4,
+          name: '',
+        },
+        {
+          threshold: 7200 * 5,
+          name: '',
+        },
+        {
+          threshold: 7200 * 6,
+          name: '',
+        },
+        {
+          threshold: 7200 * 7,
+          name: '',
+        },
+      ] as { threshold: number; name: string }[],
     };
   },
   computed: {
@@ -95,6 +102,7 @@ export default {
     this.timeSlots = this.timeSlotsFunction;
     document.addEventListener('scroll', this.handleScroll);
     document.addEventListener('wheel', this.handleWheel);
+    this.calculateDateThresholdNames();
   },
   beforeUnmount() {
     document.removeEventListener('scroll', this.handleScroll);
@@ -103,33 +111,73 @@ export default {
   created() {
     // Fetch todays programs
     this.fetchProgramsToday().then((response) => {
-      this.fetchProgramCallback(response, "today");
+      this.fetchProgramCallback(response, 'today');
       this.$nextTick(() => this.scrollTodaysScheduleIntoView());
     });
   },
   methods: {
     emitError() {
-      // Emit an event with a custom name, e.g., 'childEvent'
       this.$emit('fetchError');
     },
-    calculateSlotStyle(index) {
+    emitDayChange(currentDay: string) {
+      this.$emit('dayChange', currentDay);
+    },
+    calculateDateData() {
+      const dateData = [];
+      const today = new Date();
+
+      // Function to format a date as "YYYY-MM-DD"
+      const formatDate = (date: Date) => {
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const day = String(date.getDate()).padStart(2, '0');
+        return `${year}-${month}-${day}`;
+      };
+
+      // Calculate and format yesterday's date
+      const yesterday = new Date(today);
+      yesterday.setDate(today.getDate() - 1);
+      dateData.push(formatDate(yesterday));
+
+      // Format today's date
+      const formattedToday = formatDate(today);
+      dateData.push(formattedToday);
+
+      // Calculate and format the next five days
+      for (let i = 1; i <= 5; i++) {
+        const nextDay = new Date(today);
+        nextDay.setDate(today.getDate() + i);
+        dateData.push(formatDate(nextDay));
+      }
+
+      return dateData;
+    },
+    calculateDateThresholdNames() {
+      // asign dates to this.dayThresholds, starting at day after tommorow
+      // which should equalto this.dates[3]
+      for (let i = 3; i < this.dayThresholds.length; i++) {
+        this.dayThresholds[i].name = this.dates[i];
+      }
+    },
+    getThresholdName(value: number) {
+      // find first threshold which is bigger than value, if none found return last
+      const threshold = this.dayThresholds.find((threshold) => threshold.threshold > value);
+      return threshold ? threshold.name : this.dayThresholds[this.dayThresholds.length - 1].name;
+    },
+    calculateSlotStyle(i: number) {
       return {
-        'grid-row-start': `${index - 1}`,
-        'grid-row-end': `${index}`,
+        'grid-row-start': `${i - 1}`,
+        'grid-row-end': `${i}`,
       };
     },
     scrollTodaysScheduleIntoView() {
-      const element = this.$refs.todaysSchedule;
+      const element = this.$refs.todaysSchedule as HTMLElement;
 
       if (element) {
         element.scrollIntoView({ block: 'start' });
       }
     },
-
-    toggleSnackbar() {
-      this.snackbar = !this.snackbar;
-    },
-    compareTimeStrings(a, b) {
+    compareTimeStrings(a: Program, b: Program) {
       const [hoursA, minutesA] = a.time.split(':').map(Number);
       const [hoursB, minutesB] = b.time.split(':').map(Number);
 
@@ -140,18 +188,18 @@ export default {
       return hoursA - hoursB;
     },
     async fetchYesterdayPrograms() {
-      return await getPrograms(this.dates[0], []);
+      return await getPrograms(this.dates[0], this.stationdIds);
     },
     async fetchProgramsToday() {
-      return await getPrograms(this.dates[1], []);
+      return await getPrograms(this.dates[1], this.stationdIds);
     },
-    async fetchFuturePrograms(i) {
-      return await getPrograms(this.dates[2 + i], []);
+    async fetchFuturePrograms(i: number) {
+      return await getPrograms(this.dates[2 + i], this.stationdIds);
     },
-    handleProgramOverflowYesterday (source, target) {
+    handleProgramOverflowYesterday(source: Program[][], target: Program[][]) {
       const lastShowsOfTheDay = [];
 
-      // based on the way we push these in fetchProgramCallback we 
+      // based on the way we push these in fetchProgramCallback we
       // know which channel is on which index so we can just push them
       // and safely assume in further processing
       for (let i = 0; i < source.length; i++) {
@@ -170,56 +218,65 @@ export default {
         target[j]?.unshift(show);
       }
     },
-    fetchProgramCallback(response, day) {
-      if (response === null) {
-        this.toggleSnackbar();
+    fetchProgramCallback(response: ProgramResponse | null, day: string) {
+      if (response === null || !response?.status || response.hasError) {
+        this.emitError();
         return;
       }
 
-      const jojka =
-        response['module:com_playground/tv/tv/getProgram#1']?.result;
-      const markiza =
-        response['module:com_playground/tv/tv/getProgram#2']?.result;
-      const jednotka =
-        response['module:com_playground/tv/tv/getProgram#3']?.result;
+      const jojka = response['module:com_playground/tv/tv/getProgram#1'];
+      const markiza = response['module:com_playground/tv/tv/getProgram#2'];
+      const jednotka = response['module:com_playground/tv/tv/getProgram#3'];
 
-      if (jojka === null || markiza === null || jednotka === null) {
-        this.toggleSnackbar();
+      if (
+        jojka === null ||
+        markiza === null ||
+        jednotka === null ||
+        jojka.status === false ||
+        markiza.status === false ||
+        jednotka.status === false ||
+        !jojka?.result.length ||
+        !markiza?.result.length ||
+        !jednotka?.result.length
+      ) {
+        this.emitError();
         return;
       }
 
       // BEWARE: The channels order matter, check handleProgramOverflowYesterday method
       const channels = [
-          jojka?.sort(this.compareTimeStrings),
-          markiza?.sort(this.compareTimeStrings),
-          jednotka?.sort(this.compareTimeStrings),
-        ];
+        jojka.result.sort(this.compareTimeStrings),
+        markiza.result.sort(this.compareTimeStrings),
+        jednotka.result.sort(this.compareTimeStrings),
+      ];
 
       switch (day) {
-        case "yesterday":
-          this.channelsYesterday.push(...channels);
-          this.handleProgramOverflowYesterday(this.channelsYesterday, this.channelsToday);
+        case 'yesterday':
+          this.channelsYesterday.push(...channels as unknown as Program[]);
+          this.handleProgramOverflowYesterday(this.channelsYesterday as unknown as Program[][], this.channelsToday as unknown as Program[][]);
           break;
-        case "today":
-          this.channelsToday.push(...channels);
+        case 'today':
+          this.channelsToday.push(...channels as unknown as Program[]);
           break;
         default:
-          this.channelsFutureDays.push(channels);
+          this.channelsFutureDays.push(channels as unknown as Program[]);
           // source is either today or the previous future day that was fetched
           // target is always the last one pushed
           this.handleProgramOverflowYesterday(
-            this.channelsFutureDays.length === 1 ? this.channelsToday : this.channelsFutureDays[this.channelsFutureDays.length - 2],
-            this.channelsFutureDays[this.channelsFutureDays.length - 1]
+            this.channelsFutureDays.length === 1
+              ? this.channelsToday as unknown as Program[][]
+              : this.channelsFutureDays[this.channelsFutureDays.length - 2] as unknown as Program[][],
+            this.channelsFutureDays[this.channelsFutureDays.length - 1] as unknown as Program[][]
           );
           break;
       }
     },
-    handleWheel(event) {
+    handleWheel(event: WheelEvent) {
       const scrollY = window.scrollY;
       if (scrollY <= 7200 && event.deltaY <= 0 && !this.isYesterdayLoaded) {
         this.isYesterdayLoaded = true;
-        this.fetchYesterdayPrograms().then((response) =>
-          this.fetchProgramCallback(response, "yesterday")
+        this.fetchYesterdayPrograms().then((response: ProgramResponse | null) =>
+          this.fetchProgramCallback(response, 'yesterday')
         );
       }
     },
@@ -228,30 +285,39 @@ export default {
       const containerHeightMin = 6200 + totalOffset;
       const containerHeightMax = containerHeightMin + 100;
       const scrollHeight = Math.round(window.scrollY);
+
+      const currentDay = this.getThresholdName(scrollHeight);
+      if (currentDay !== this.currentDay) {
+        this.currentDay = currentDay;
+        this.emitDayChange(currentDay);
+      }
       if (
         scrollHeight > containerHeightMin &&
         scrollHeight < containerHeightMax &&
         !this.isAllFetched
       ) {
         this.isLoading = true;
-        this.fetchFuturePrograms(this.channelsFutureDays.length).then((response) =>
-          {
-            this.fetchProgramCallback(response, "other");
-            this.isLoading = false;
-            if (this.channelsFutureDays.length >= this.maxFutureDays) {
-              this.isAllFetched = true;
-            }
-          });
+        this.fetchFuturePrograms(this.channelsFutureDays.length).then((response: ProgramResponse | null) => {
+          this.fetchProgramCallback(response, 'other');
+          this.isLoading = false;
+          if (this.channelsFutureDays.length >= this.maxFutureDays) {
+            this.isAllFetched = true;
+          }
+        });
       }
     },
   },
-};
+});
 </script>
 
 <style scoped>
 .loader {
   width: 50%;
   height: 7200px;
+}
+
+h1 {
+  padding-block: 3%;
 }
 .wrapper {
   display: flex;
@@ -296,7 +362,6 @@ export default {
   border: 1px solid #ccc;
   background-color: #ffffff;
   border-radius: 10px;
-  /* padding: 5px; */
   cursor: pointer;
   transition: background-color 0.3s;
 }
