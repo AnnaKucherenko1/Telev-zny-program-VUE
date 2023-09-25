@@ -13,7 +13,7 @@ To install the project, follow these steps:
  ```console
 npm install
 ```
-##To run the application, use the following command:
+To run the application, use the following command:
 ```console
 npm run serve 
 ```
