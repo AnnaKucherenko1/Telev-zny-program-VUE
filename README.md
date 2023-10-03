@@ -31,9 +31,9 @@ npm run serve
 ```
 ## Screenshots
 
-![Home page gif](/telzoznam.gif)
+![Home page gif](/client/public/telzoznam.gif)
 
 Today schedule
-![Today schedule](/dnes.png)
+![Today schedule](/client/public/dnes.png)
 Next days schedule
-![Next days schedule](/zajtra.png)
+![Next days schedule](/client/public//zajtra.png)
