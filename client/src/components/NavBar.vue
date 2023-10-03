@@ -1,8 +1,5 @@
 <template>
   <div class="navbar">
-    <div class="logo">
-      <img src="./../assets/systemomega-logo.png" alt="Logo" />
-    </div>
     <div>
       <div class="border-for-img">
         <div class="elements-wrapper">
@@ -38,17 +35,11 @@ export default defineComponent({
   display: flex;
   background-color: white;
   flex-direction: column;
-  padding-top: 20px;
+  padding-top: 35px;
   border: 1px;
   height: 9vh;
   box-shadow: 4px 4px 4px rgba(0, 0, 0, 0.2);
   z-index: 5;
-}
-
-.logo img {
-  margin-left: 3%;
-  height: 40px;
-  margin-right: 10px;
 }
 
 .current-day {
@@ -100,6 +91,6 @@ export default defineComponent({
 }
 
 .border-for-img {
-  margin-top: -25px;
+  top: calc(0% - 150px);
 }
 </style>
